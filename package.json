@@ -1,0 +1,16 @@
+{
+  "name": "invictus-advisory",
+  "version": "1.0.0",
+  "description": "AI-powered SMB financial advisory triage service",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "demo": "node test/demo.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
+    "dotenv": "^17.0.0",
+    "express": "^5.0.0"
+  }
+}
