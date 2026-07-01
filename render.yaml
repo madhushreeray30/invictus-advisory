@@ -1,0 +1,15 @@
+# Render blueprint — deploy with one click from the repo.
+# https://render.com  →  New  →  Blueprint  →  pick this repo.
+# ANTHROPIC_API_KEY is optional: without it the service runs in mock mode,
+# so the deploy is live even before you add a key.
+services:
+  - type: web
+    name: invictus-advisory
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false # set this in the Render dashboard to enable the real LLM

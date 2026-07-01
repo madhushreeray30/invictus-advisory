@@ -33,6 +33,27 @@ To use the real model instead of the mock, copy `.env.example` → `.env` and se
 
 ---
 
+## Deploy (hosted URL)
+
+The service is cloud-ready (reads `PORT` from the environment, `/health` check,
+no build step). A `render.yaml` blueprint and a `Procfile` are included.
+
+**Render (recommended, free tier):**
+1. Push this repo to GitHub (done).
+2. On [render.com](https://render.com): **New → Blueprint** → pick this repo → **Apply**.
+3. (Optional) In the service's **Environment** tab, add `ANTHROPIC_API_KEY` to switch
+   from mock mode to the real model. It deploys and runs fine without one.
+
+**Railway / Heroku-style:** the `Procfile` (`web: npm start`) works as-is; set
+`ANTHROPIC_API_KEY` in the platform's variables if you want the LLM path.
+
+Verify a live deploy:
+```bash
+curl -s https://<your-app>.onrender.com/health
+```
+
+---
+
 ## What it does (mapping to the brief)
 
 | Requirement | Where |
