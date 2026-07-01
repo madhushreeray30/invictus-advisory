@@ -7,6 +7,7 @@
 // different category, a low-info case (missing-information state), and an
 // off-topic / ambiguous case (should land on a human).
 
+import "dotenv/config";
 import { classify } from "../src/classify.js";
 import { route } from "../src/route.js";
 
