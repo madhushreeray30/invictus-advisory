@@ -13,8 +13,23 @@ app.use((req, _res, next) => {
   next();
 });
 
+// NEW: Added a root handler so you don't get "Cannot GET /" anymore
+app.get("/", (_req, res) => {
+  res.json({
+    status: "ok",
+    message: "Welcome to the Invictus Advisory Triage API",
+    endpoints: {
+      health: "/health",
+      triage: "/triage (POST)",
+    },
+  });
+});
+
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", llm: process.env.ANTHROPIC_API_KEY ? "configured" : "mock" });
+  res.json({
+    status: "ok",
+    llm: process.env.ANTHROPIC_API_KEY ? "configured" : "mock",
+  });
 });
 
 // Main endpoint: free text (+ optional context) -> structured triage + next action.
@@ -22,11 +37,16 @@ app.post("/triage", async (req, res) => {
   const { text, context } = req.body || {};
 
   if (typeof text !== "string" || !text.trim()) {
-    return res.status(400).json({ error: "Body must include a non-empty 'text' string." });
+    return res
+      .status(400)
+      .json({ error: "Body must include a non-empty 'text' string." });
   }
 
   try {
-    const { result, source, degraded, note } = await classify(text, context || {});
+    const { result, source, degraded, note } = await classify(
+      text,
+      context || {},
+    );
     const decision = route(result);
 
     const latency_ms = Date.now() - req._t0;
@@ -41,23 +61,33 @@ app.post("/triage", async (req, res) => {
         status: decision.status,
         urgency: decision.urgency,
         confidence: decision.confidence,
-      })
+      }),
     );
 
     res.json({
       ...decision,
-      meta: { source, degraded, note, latency_ms, model: source === "llm" ? "claude-opus-4-8" : "heuristic" },
+      meta: {
+        source,
+        degraded,
+        note,
+        latency_ms,
+        model: source === "llm" ? "claude-opus-4-8" : "heuristic",
+      },
     });
   } catch (err) {
     // Last-resort guard. classify() already degrades gracefully, so reaching
     // here means something unexpected — fail closed with a 500, don't hang.
-    console.error(JSON.stringify({ at: new Date().toISOString(), error: err.message }));
+    console.error(
+      JSON.stringify({ at: new Date().toISOString(), error: err.message }),
+    );
     res.status(500).json({ error: "Internal triage error." });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  const mode = process.env.ANTHROPIC_API_KEY ? "LLM (claude-opus-4-8)" : "MOCK (heuristic — no API key)";
+  const mode = process.env.ANTHROPIC_API_KEY
+    ? "LLM (claude-opus-4-8)"
+    : "MOCK (heuristic — no API key)";
   console.log(`invictus-advisory listening on :${PORT}  [${mode}]`);
 });
